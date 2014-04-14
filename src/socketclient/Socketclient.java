@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,28 +22,40 @@ import java.util.logging.Logger;
  */
 public class Socketclient {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
+    private Socket client;
+    private PrintWriter OutputWriter;
+    private BufferedReader reader;
+    private OutputThread SocketReader;
+    private BufferedReader InputReader;
+    
+    public Socketclient(){
         try {
-            Socket testclient = new Socket(InetAddress.getLocalHost(), 1337);
-            PrintWriter out = new PrintWriter(testclient.getOutputStream(), true);
-            BufferedReader socketin = new BufferedReader(new InputStreamReader(testclient.getInputStream()));
-            BufferedReader UserIn = new BufferedReader(new InputStreamReader(System.in));
-            
-            
-            String input;
-            String output;
-            
-            
-            
-            
+            client = new Socket(InetAddress.getLocalHost(), 1337);
+            OutputWriter = new PrintWriter(client.getOutputStream(), true);
+            reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            InputReader = new BufferedReader(new InputStreamReader(System.in));
+            SocketReader = new OutputThread(client, reader);
             
             
         } catch (IOException ex) {
-            System.out.println("Connection failed");
+            Logger.getLogger(Socketclient.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Could not connect to server");
         }
     }
     
+    public void StartReading(){
+        SocketReader.start();
+    }
+    
+    public void StartSending(){
+        String userinput;
+        try {
+            while ((userinput = InputReader.readLine()) != null){
+                OutputWriter.println(userinput);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Socketclient.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("could not send output");
+        }
+    } 
 }

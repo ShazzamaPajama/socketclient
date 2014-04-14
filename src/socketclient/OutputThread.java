@@ -19,22 +19,27 @@ import java.util.logging.Logger;
  */
 public class OutputThread extends Thread{
     private final Socket connection;
-    private BufferedReader output;
+    private BufferedReader SocketReader;
     
-    public OutputThread(Socket server, BufferedReader OutputStream){
+    public OutputThread(Socket server, BufferedReader socketin){
         connection = server;
         
-        try {
-            output = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            
-            while (true){
-                String Outputstring = output.readLine();
-                
-                System.out.println(Outputstring);
-                
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(OutputThread.class.getName()).log(Level.SEVERE, null, ex);
+        SocketReader = socketin;
+    }
+    
+    @Override
+    public void run(){
+        String SocketString;
+        System.out.println("Output Thread started");
+        try{
+            String output;
+            while(true){
+                output = SocketReader.readLine();
+                System.out.println("Server: " + output);
+            } 
+        } catch (IOException ex){
+            System.out.println("Failed to read from socket");
         }
+        
     }
 }
